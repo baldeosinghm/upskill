@@ -1,16 +1,39 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
+	"os"
 
+	"github.com/baldeosinghm/upskill/internal/db"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	r := chi.NewRouter() // Set up router
+	// Establish DB connection
+	//
+	// 1. Create a context for startup
+	ctx := context.Background()
+
+	// 2. Connect to the database
+	err := godotenv.Load()
+	connStr := os.Getenv("DATABASE_URL")
+	pool, err := db.NewPool(ctx, connStr)
+
+	if err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
+	} else {
+		defer pool.Close()
+	}
+
+	log.Println("Database connection established.")
+
+	// 3. Set up router
+	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
@@ -19,6 +42,10 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	fmt.Println("upskill-api starting...")
-	http.ListenAndServe(":8080", r) // Pass chi as the router for http requests
+	// 4. Start up server
+	log.Println("upskill-api starting on :8080...")
+	// Pass chi as the router for http requests
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }

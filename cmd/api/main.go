@@ -14,9 +14,8 @@ import (
 )
 
 func main() {
-	// Establish DB connection
-	//
-	// 1. Create a context for startup
+	// 1. Create a context for startup.  You always need to create one.
+	// This is the exact way of creating a context.
 	ctx := context.Background()
 
 	// 2. Connect to the database
@@ -25,12 +24,17 @@ func main() {
 	pool, err := db.NewPool(ctx, connStr)
 
 	if err != nil {
-		log.Fatalf("Could not connect to database: %v", err)
+		log.Fatalf("could not connect to database: %v", err)
 	} else {
 		defer pool.Close()
 	}
 
-	log.Println("Database connection established.")
+	log.Println("database connection established")
+
+	// Run migrations on startup
+	if err := db.RunMigrations(connStr); err != nil {
+		log.Println(err)
+	}
 
 	// 3. Set up router
 	r := chi.NewRouter()
@@ -46,6 +50,6 @@ func main() {
 	log.Println("upskill-api starting on :8080...")
 	// Pass chi as the router for http requests
 	if err := http.ListenAndServe(":8080", r); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+		log.Fatalf("server failed to start: %v", err)
 	}
 }

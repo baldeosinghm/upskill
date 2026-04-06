@@ -31,8 +31,6 @@ func NewPool(ctx context.Context, connStr string) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-// Run migrations on start up
-//
 // Migrations manages tables; also enables us to create them
 func RunMigrations(connStr string) error {
 	m, err := migrate.New("file://migrations", connStr)

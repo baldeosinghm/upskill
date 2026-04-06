@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/baldeosinghm/upskill/internal/db"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/baldeosinghm/upskill/internal/routes"
 	"github.com/joho/godotenv"
 )
 
@@ -20,6 +18,9 @@ func main() {
 
 	// 2. Connect to the database
 	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("failed to read database url from env file: %v", err)
+	}
 	connStr := os.Getenv("DATABASE_URL")
 	pool, err := db.NewPool(ctx, connStr)
 
@@ -28,7 +29,6 @@ func main() {
 	} else {
 		defer pool.Close()
 	}
-
 	log.Println("database connection established")
 
 	// Run migrations on startup
@@ -36,17 +36,10 @@ func main() {
 		log.Println(err)
 	}
 
-	// 3. Set up router
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	// 3. Set up router + route requests
+	r := routes.RegisterRoutes(pool)
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
-
-	// 4. Start up server
+	// 4. Start up server (this happen last)
 	log.Println("upskill-api starting on :8080...")
 	// Pass chi as the router for http requests
 	if err := http.ListenAndServe(":8080", r); err != nil {

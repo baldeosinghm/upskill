@@ -49,9 +49,36 @@ func (r Repository) Create(ctx context.Context, username, email, passwordHash, r
 	return &user, nil
 }
 
+// Locate user by id
+func (r *Repository) Login(ctx context.Context, email string) (string, error) {
+	var passwordHash string
+	err := r.db.QueryRow(
+		ctx,
+		`
+		SELECT password FROM users WHERE email=$1
+		`,
+		email,
+	).Scan(&passwordHash)
+	if err != nil {
+		return "", fmt.Errorf("create user: %w", err)
+	}
+	return passwordHash, nil
+}
+
 // Locate user by email
-func (r *Repository) FindByEmail(ctx context.Context, email string) (*User, error) {
-	return nil, nil
+func (r *Repository) FindByEmail(ctx context.Context, email string) (bool, error) {
+	var exists bool
+	err := r.db.QueryRow(
+		ctx,
+		`
+		SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)
+		`,
+		email,
+	).Scan(&exists)
+	if err != nil {
+		return exists, fmt.Errorf("create user: %w", err)
+	}
+	return exists, nil
 }
 
 // Delete user

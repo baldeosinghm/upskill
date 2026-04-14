@@ -48,3 +48,45 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
+
+func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
+	var req UserRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	verified, err := h.service.Login(
+		r.Context(),
+		req.Email,
+		req.Password,
+	)
+	if err != nil {
+		log.Printf("internal error: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	// Return something back to the user that can be used to verify identity
+	// when accessing user features once logged in
+	log.Printf("user authenticated: %v", verified)
+}
+
+func (h Handler) FindByEmail(w http.ResponseWriter, r *http.Request) {
+	var req UserRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	exists, err := h.service.LocateEmail(r.Context(), req.Email)
+	if err != nil {
+		log.Printf("internal error: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(exists)
+}

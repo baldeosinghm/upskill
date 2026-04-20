@@ -2,6 +2,7 @@ package users
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
@@ -15,6 +16,10 @@ type UserRequest struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
 	Role     string `json:"role"`
+}
+
+type LoginResponse struct {
+	UserID string `json:"user_id"`
 }
 
 func NewHandler(service *Service) *Handler {
@@ -57,19 +62,32 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	verified, err := h.service.Login(
+	id, err := h.service.Login(
 		r.Context(),
 		req.Email,
 		req.Password,
 	)
+
+	if errors.Is(err, ErrInvalidCredentials) {
+		http.Error(w, "invalid credentials: ", http.StatusUnauthorized)
+		return
+	}
 	if err != nil {
-		log.Printf("internal error: %v", err)
+		log.Printf("login error: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+
+	// id is "" when err is non-nil; build it after all error checks
+	var response LoginResponse
+	response.UserID = id
+
 	// Return something back to the user that can be used to verify identity
 	// when accessing user features once logged in
-	log.Printf("user authenticated: %v", verified)
+	log.Printf("user id: %v", id)
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h Handler) FindByEmail(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +98,7 @@ func (h Handler) FindByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := h.service.LocateEmail(r.Context(), req.Email)
+	exists, err := h.service.FindByEmail(r.Context(), req.Email)
 	if err != nil {
 		log.Printf("internal error: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)

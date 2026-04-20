@@ -21,10 +21,12 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	// Route requests
+	// Instances of each domain
 	repo := users.NewRepository(db)
 	service := users.NewService(repo)
 	handler := users.NewHandler(service)
+
+	// Route requests
 	r.Post("/users", handler.CreateUser)
 	// r.Get("/users/{email}", handler.FindByEmail)
 	// r.Get("/users?email={email}&password={password}", handler.Login)

@@ -49,20 +49,20 @@ func (r Repository) Create(ctx context.Context, username, email, passwordHash, r
 	return &user, nil
 }
 
-// Locate user by id
-func (r *Repository) Login(ctx context.Context, email string) (string, error) {
-	var passwordHash string
+// Login
+func (r *Repository) Login(ctx context.Context, email string) (*User, error) {
+	var user User
 	err := r.db.QueryRow(
 		ctx,
 		`
-		SELECT password FROM users WHERE email=$1
+		SELECT id, password FROM users WHERE email=$1
 		`,
 		email,
-	).Scan(&passwordHash)
+	).Scan(&user.ID, &user.Password)
 	if err != nil {
-		return "", fmt.Errorf("create user: %w", err)
+		return nil, fmt.Errorf("login error: %w", err)
 	}
-	return passwordHash, nil
+	return &user, nil
 }
 
 // Locate user by email
@@ -82,8 +82,6 @@ func (r *Repository) FindByEmail(ctx context.Context, email string) (bool, error
 }
 
 // Delete user
-
-// Login
 
 // Create a course (make them owner)
 

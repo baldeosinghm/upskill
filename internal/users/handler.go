@@ -69,7 +69,7 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if errors.Is(err, ErrInvalidCredentials) {
-		http.Error(w, "invalid credentials: ", http.StatusUnauthorized)
+		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
 	if err != nil {
@@ -88,23 +88,4 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
-}
-
-func (h Handler) FindByEmail(w http.ResponseWriter, r *http.Request) {
-	var req UserRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	exists, err := h.service.FindByEmail(r.Context(), req.Email)
-	if err != nil {
-		log.Printf("internal error: %v", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(exists)
 }

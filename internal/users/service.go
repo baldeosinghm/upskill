@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -26,10 +25,15 @@ func (service Service) CreateUser(ctx context.Context, username, email, password
 	// Hash user's password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
+	if err != nil {
+		return nil, fmt.Errorf("unable to hash password: %w", err)
+	}
+
 	// Pass hashed password to db
 	user, err := service.repo.Create(ctx, username, email, string(passwordHash), role)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 	return user, nil
 }
@@ -56,13 +60,4 @@ func (service Service) Login(ctx context.Context, email, password string) (strin
 
 	// Password matches to email, return user's ID
 	return user.ID, nil
-}
-
-func (service Service) FindByEmail(ctx context.Context, email string) (bool, error) {
-	exists, err := service.repo.FindByEmail(ctx, email)
-	if err != nil {
-		return exists, err
-	}
-	log.Println("user exists")
-	return exists, nil
 }

@@ -60,25 +60,9 @@ func (r *Repository) Login(ctx context.Context, email string) (*User, error) {
 		email,
 	).Scan(&user.ID, &user.Password)
 	if err != nil {
-		return nil, fmt.Errorf("login error: %w", err)
+		return nil, fmt.Errorf("login user: %w", err)
 	}
 	return &user, nil
-}
-
-// Locate user by email
-func (r *Repository) FindByEmail(ctx context.Context, email string) (bool, error) {
-	var exists bool
-	err := r.db.QueryRow(
-		ctx,
-		`
-		SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)
-		`,
-		email,
-	).Scan(&exists)
-	if err != nil {
-		return exists, fmt.Errorf("create user: %w", err)
-	}
-	return exists, nil
 }
 
 // Delete user

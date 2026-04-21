@@ -22,14 +22,12 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 	})
 
 	// Instances of each domain
-	repo := users.NewRepository(db)
-	service := users.NewService(repo)
-	handler := users.NewHandler(service)
+	uRepo := users.NewRepository(db)
+	uService := users.NewService(uRepo)
+	uHandler := users.NewHandler(uService)
 
 	// Route requests
-	r.Post("/users", handler.CreateUser)
-	// r.Get("/users/{email}", handler.FindByEmail)
-	// r.Get("/users?email={email}&password={password}", handler.Login)
-
+	r.Post("/users", uHandler.CreateUser)
+	r.Post("/login", uHandler.Login)
 	return r
 }

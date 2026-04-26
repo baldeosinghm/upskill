@@ -11,7 +11,7 @@
 
 - Used Handler-Service-Repository pattern
     - Advantages: decoupling, testing, flexibility.
-    - Ensures each domain only executes functions in accordance to its purpose.
+    - Ensures each layer only executes functions in accordance to its purpose.
 
 ## HTTP Services
 - Router: `chi`
@@ -24,3 +24,10 @@
     - Returned sentinel erorr, `ErrInvalidCredentials`, for both no-user and bad-password to prevent enumeration.
 - Routes
     - Chose `/login` as opposed to more RESTful `/sessions` as endpoint for user login. `/sessions` reflects a strict REST/resource-oriented worldview ("a session is a thing you create"), while /login reflects an action-oriented worldview ("login is something you do"), which feels more in accordance with this product's current mental framework.
+
+# Phase 2
+
+## Key Decisions
+- Enforcing Teacher-Owner constraint on courses table
+    - There's two options here: enforce at the application layer or at the database level.  I chose to enforce this check at the service layer because
+    if an attempt to make a non-teacher an owner of a course is made, it can be easily flagged.  Also, fixing this problem is easier here than at the DB-level.  If in the future, I add a role, it would involve appling a new constraint to the table and that won't as easy.

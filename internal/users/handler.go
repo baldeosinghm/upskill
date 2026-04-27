@@ -26,7 +26,7 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req UserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -37,7 +37,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// r *http.Request has a package, Context(), that contains timelines,
 	// deadlines, etc. (same as the context.Context package) to give
 	// context, for lack of a better word, for cancellations
-	user, err := h.service.CreateUser(
+	user, err := h.service.Create(
 		r.Context(),
 		req.Username,
 		req.Email,
@@ -49,7 +49,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
@@ -85,7 +85,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	// Return something back to the user that can be used to verify identity
 	// when accessing user features once logged in
 	log.Printf("user id: %v", id)
-	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }

@@ -22,7 +22,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 var ErrUserNotFound = errors.New("user not found")
 
 // Create a user
-func (s *Service) CreateUser(ctx context.Context, username, email, password, role string) (*User, error) {
+func (s *Service) Create(ctx context.Context, username, email, password, role string) (*User, error) {
 	// Hash user's password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 

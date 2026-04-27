@@ -27,7 +27,7 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 	uHandler := users.NewHandler(uService)
 
 	// Route requests
-	r.Post("/users", uHandler.CreateUser)
+	r.Post("/users", uHandler.Create)
 	r.Post("/login", uHandler.Login)
 	return r
 }

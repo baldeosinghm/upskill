@@ -30,7 +30,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 //
 
 // Create user: either TEACHER or STUDENT
-func (r Repository) Create(ctx context.Context, username, email, passwordHash, role string) (*User, error) {
+func (r *Repository) Create(ctx context.Context, username, email, passwordHash, role string) (*User, error) {
 	// create var user of type User so that row data can be store in it
 	var user User
 	args := []any{username, email, passwordHash, role}
@@ -61,6 +61,24 @@ func (r *Repository) Login(ctx context.Context, email string) (*User, error) {
 	).Scan(&user.ID, &user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("login user: %w", err)
+	}
+	return &user, nil
+}
+
+// Find a user by ID (used for internal lookups across domains)
+func (r *Repository) GetByID(ctx context.Context, id string) (*User, error) {
+	var user User
+	err := r.db.QueryRow(
+		ctx,
+		`
+		SELECT id, username, email, role, created_at
+		FROM users
+		WHERE id = $1
+		`,
+		id,
+	).Scan(&user.ID, &user.Username, &user.Email, &user.Role, &user.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
 	}
 	return &user, nil
 }

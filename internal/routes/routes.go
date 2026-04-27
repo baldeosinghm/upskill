@@ -21,7 +21,7 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	// Instances of each domain
+	// Users domain instances
 	uRepo := users.NewRepository(db)
 	uService := users.NewService(uRepo)
 	uHandler := users.NewHandler(uService)

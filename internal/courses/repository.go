@@ -58,7 +58,7 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*Course, error) {
 		SELECT id, name, owner_id, created_at, updated_at FROM courses WHERE id=$1
 		`,
 		id,
-	).Scan(&course.ID, &course.Name, &course.OwnerID)
+	).Scan(&course.ID, &course.Name, &course.OwnerID, &course.CreatedAt, &course.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("get course: %w", err)
 	}
@@ -66,3 +66,25 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*Course, error) {
 }
 
 // List all courses
+func (r *Repository) List(ctx context.Context) ([]Course, error) {
+	// TODO: pagniate rows
+	rows, err := r.db.Query(ctx, `SELECT id, name, owner_id, created_at, updated_at FROM courses`)
+	if err != nil {
+		return nil, fmt.Errorf("list courses: %w", err)
+	}
+	defer rows.Close()
+
+	var courses []Course
+	for rows.Next() {
+		var c Course
+		if err := rows.Scan(&c.ID, &c.Name, &c.OwnerID, &c.CreatedAt, &c.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("list courses scan: %w", err)
+		}
+		courses = append(courses, c)
+	}
+	// If error within rows returned, log it
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list courses iteration: %w", err)
+	}
+	return courses, nil
+}

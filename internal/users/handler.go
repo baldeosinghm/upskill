@@ -26,7 +26,7 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req UserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -54,7 +54,7 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req UserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {

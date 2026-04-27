@@ -31,3 +31,6 @@
 - Enforcing Teacher-Owner constraint on courses table
     - There's two options here: enforce at the application layer or at the database level.  I chose to enforce this check at the service layer because
     if an attempt to make a non-teacher an owner of a course is made, it can be easily flagged.  Also, fixing this problem is easier here than at the DB-level.  If in the future, I add a role, it would involve appling a new constraint to the table and that won't as easy.
+
+- Zero Parameters for `courses.repository.List()`
+    - `List()` in `repository.go` currently doens't have any parameters that are passed to it's db query.  There currently isn't a need for to pass arguments, but if this app were to someday have thousands of courses, it may be helpful to introduce pagination so we don't return so many rows at once.

@@ -1,4 +1,4 @@
-# Phase 1
+# Phase 1: Set Up `users` domain
 
 ## Database Migrations
 
@@ -25,9 +25,20 @@
 - Routes
     - Chose `/login` as opposed to more RESTful `/sessions` as endpoint for user login. `/sessions` reflects a strict REST/resource-oriented worldview ("a session is a thing you create"), while /login reflects an action-oriented worldview ("login is something you do"), which feels more in accordance with this product's current mental framework.
 
-# Phase 2
+# Phase 2: Set Up `courses` domain
+
+## Updates
+- New migration with three real schema changes (renames, NOT NULL, FK with ON DELETE behavior) plus a clean down-migration that round-trips.
+- Full courses domain across all three architectural layers.
+- A new cross-domain dependency (courses -> users service) wired correctly through dependency injection.
+- Real business logic in the service (teacher-role check) with proper sentinel errors.
+- HTTP status code mapping that actually distinguishes 403 vs 404 vs 500.
+- Backfilled GetByID on the users service so future domains can reuse it.
 
 ## Key Decisions
+- Preserving API architectue
+    - Courses full mirrors the handler -> service -> repository setup from users.
+
 - Enforcing Teacher-Owner constraint on courses table
     - There's two options here: enforce at the application layer or at the database level.  I chose to enforce this check at the service layer because
     if an attempt to make a non-teacher an owner of a course is made, it can be easily flagged.  Also, fixing this problem is easier here than at the DB-level.  If in the future, I add a role, it would involve appling a new constraint to the table and that won't as easy.

@@ -22,10 +22,12 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	// Users service
 	uRepo := users.NewRepository(db)
 	uService := users.NewService(uRepo)
 	uHandler := users.NewHandler(uService)
 
+	// Courses service
 	cRepo := courses.NewRepository(db)
 	cService := courses.NewService(cRepo, uService)
 	cHandler := courses.NewHandler(cService)

@@ -82,29 +82,3 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*User, error) {
 	}
 	return &user, nil
 }
-
-// Delete user
-
-// Create a course (make them owner)
-
-// Create an assignment
-
-// Invite student to course
-
-// Share assignment w/ student
-
-// Update assignment
-
-// Delete assignment
-
-// Grade assignment
-
-//
-// STUDENT FUNCTIONALITY
-//
-
-// Join a course (student)
-
-// See assignments
-
-// Turn in assignment (either no action or action, i.e. upload)

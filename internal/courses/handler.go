@@ -8,6 +8,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+/*
+
+API layer that receives raw request, parses JSON data, handles
+authentication, passes the validated data to the Service layer,
+and formats the output back into the appropriate client response.
+
+*/
+
 type Handler struct {
 	service *Service
 }

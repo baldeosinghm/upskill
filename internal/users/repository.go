@@ -19,8 +19,8 @@ type Repository struct {
 }
 
 // This constructor allows us to create an instance of the
-// Repository struct.  We'll use dependency injection (see main.go)
-// to avoid testing db connection here, but rather from the main file.
+// Repository struct.  We'll use dependency injection to
+// avoid testing db connection here, but rather from main.go.
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
 }

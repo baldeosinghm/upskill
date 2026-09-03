@@ -39,7 +39,7 @@ func main() {
 	// 3. Set up router + route requests
 	r := routes.RegisterRoutes(pool)
 
-	// 4. Start up server (this happen last)
+	// 4. Start up server (this happens last)
 	log.Println("upskill-api starting on :8080...")
 	// Pass chi as the router for http requests
 	if err := http.ListenAndServe(":8080", r); err != nil {

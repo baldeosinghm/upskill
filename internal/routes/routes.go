@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/baldeosinghm/upskill/internal/courses"
+	appmw "github.com/baldeosinghm/upskill/internal/middleware"
 	"github.com/baldeosinghm/upskill/internal/users"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,7 +13,7 @@ import (
 )
 
 func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
-	// Set up router
+	// Set up router and middleware
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -33,11 +34,14 @@ func RegisterRoutes(db *pgxpool.Pool) *chi.Mux {
 	cHandler := courses.NewHandler(cService)
 
 	// Route requests
+
 	r.Post("/users", uHandler.Create)
 	r.Post("/login", uHandler.Login)
 
 	r.Route("/courses", func(r chi.Router) {
-		r.Post("/", cHandler.Create)
+		// This middleware will trigger the Idempotency function from our idempotency
+		// package when the /courses endpoint receives POST requests
+		r.With(appmw.Idempotency(db)).Post("/", cHandler.Create)
 		r.Get("/{id}", cHandler.GetByID)
 		r.Get("/", cHandler.List)
 	})
